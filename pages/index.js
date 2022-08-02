@@ -57,7 +57,7 @@ export default function Home() {
                 let author;
                 if (message.startsWith("LaMDA:")) {
                   author = "LaMDA";
-                  message = message.slice(5);
+                  message = message.slice(6);
                 } else if (message.startsWith("Human:")) {
                   author = "Human";
                   message = message.slice(6);
