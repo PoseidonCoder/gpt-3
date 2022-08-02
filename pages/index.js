@@ -41,7 +41,7 @@ export default function Home() {
   return (
     <div className="w-100 h-100">
       <Head>
-        <title>Robot</title>
+        <title>GPT-3-CHAT</title>
       </Head>
 
       <main>
