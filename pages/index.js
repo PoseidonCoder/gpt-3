@@ -36,10 +36,13 @@ export default function Home() {
     console.log(newResult);
   }
 
-  useEffect(() => (document.body.style.overflow = "hidden"), []);
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    chat.current.style.height = window.innerHeight - 100 + "px";
+  }, []);
 
   return (
-    <div className="w-100 h-100">
+    <div>
       <Head>
         <title>GPT-3-CHAT</title>
       </Head>
@@ -47,11 +50,7 @@ export default function Home() {
       <main>
         <h1 className="text-center mb-0">Talk with GPT-3!</h1>
         <div className="mx-auto" style={{ width: "60%" }}>
-          <div
-            className="px-5"
-            style={{ height: "33rem", overflow: "scroll" }}
-            ref={chat}
-          >
+          <div className="px-5" style={{ overflow: "scroll" }} ref={chat}>
             {result
               .map((message, i) => {
                 let author;
