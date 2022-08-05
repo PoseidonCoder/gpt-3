@@ -1,15 +1,33 @@
+import "regenerator-runtime/runtime";
 import Head from "next/head";
 import { useEffect, useState, useRef } from "react";
 import Button from "react-bootstrap/Button";
 import InputGroup from "react-bootstrap/InputGroup";
 import FormControl from "react-bootstrap/FormControl";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { Mic, MicFill } from "react-bootstrap-icons";
+import SpeechRecognition, {
+  useSpeechRecognition,
+} from "react-speech-recognition";
 
 export default function Home() {
-  const [promptInput, setPromptInput] = useState("");
-  const [result, setResult] = useState([]);
+  const [result, setResult] = useState([
+    "LaMDA: Hi, my name's GPT-3. What's yours?",
+  ]);
   const [AItyping, setAItyping] = useState(false);
   const chat = useRef(null);
+  const {
+    transcript,
+    listening,
+    resetTranscript,
+    browserSupportsSpeechRecognition,
+  } = useSpeechRecognition();
+  const [promptInput, setPromptInput] = useState("");
+
+  const startListening = () =>
+    SpeechRecognition.startListening({ continuous: true });
+  const stopListening = () =>
+    SpeechRecognition.stopListening() && resetTranscript();
 
   async function onSubmit(event) {
     event.preventDefault();
@@ -33,13 +51,21 @@ export default function Home() {
     setAItyping(false);
     chat.current.scrollTop = chat.current.scrollHeight;
 
+    let msg = new SpeechSynthesisUtterance();
+    msg.text = data.result;
+    window.speechSynthesis.speak(msg);
+
     console.log(newResult);
   }
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
-    chat.current.style.height = window.innerHeight - 100 + "px";
+    if (window) chat.current.style.height = window.innerHeight - 100 + "px";
   }, []);
+
+  useEffect(() => {
+    setPromptInput(transcript);
+  }, [transcript]);
 
   return (
     <div>
@@ -48,59 +74,87 @@ export default function Home() {
       </Head>
 
       <main>
-        <h1 className="text-center mb-0">Talk with GPT-3!</h1>
+        <div className="text-center mb-0">
+          <h1>Talk with GPT-3!</h1>
+          <a href="https://gpt-3-digital-human.netlify.app/">
+            digital human version
+          </a>
+        </div>
+
         <div className="mx-auto" style={{ width: "60%" }}>
           <div className="px-5" style={{ overflow: "scroll" }} ref={chat}>
-            {result
-              .map((message, i) => {
-                let author;
-                if (message.startsWith("LaMDA:")) {
-                  author = "LaMDA";
-                  message = message.slice(6);
-                } else if (message.startsWith("Human:")) {
-                  author = "Human";
-                  message = message.slice(6);
-                }
+            {result.length === 0 ? (
+              <p className="text-center text-secondary">Type something!</p>
+            ) : (
+              result
+                .map((message, i) => {
+                  let author;
+                  if (message.startsWith("LaMDA:")) {
+                    author = "LaMDA";
+                    message = message.slice(6);
+                  } else if (message.startsWith("Human:")) {
+                    author = "Human";
+                    message = message.slice(6);
+                  }
 
-                if (author) {
-                  const style = "p-2 rounded";
-                  return (
-                    <p
-                      className={
-                        author === "Human"
-                          ? style + " text-white"
-                          : style + " text-black"
-                      }
-                      style={{
-                        backgroundColor:
-                          author === "Human" ? "#218aff" : "#d8d8d8",
-                        width: "fit-content",
-                        maxWidth: "70%",
-                        marginLeft: author === "Human" ? "auto" : "",
-                      }}
-                      key={i}
-                    >
-                      {message}
-                    </p>
-                  );
-                } else {
-                  return false;
-                }
-              })
-              .filter((message) => message)}
+                  if (author) {
+                    const style = "p-2 rounded";
+                    return (
+                      <p
+                        className={
+                          author === "Human"
+                            ? style + " text-white"
+                            : style + " text-black"
+                        }
+                        style={{
+                          backgroundColor:
+                            author === "Human" ? "#218aff" : "#d8d8d8",
+                          width: "fit-content",
+                          maxWidth: "70%",
+                          marginLeft: author === "Human" ? "auto" : "",
+                        }}
+                        key={i}
+                      >
+                        {message}
+                      </p>
+                    );
+                  } else {
+                    return false;
+                  }
+                })
+                .filter((message) => message)
+            )}
           </div>
           <form onSubmit={onSubmit}>
             <InputGroup className="fixed-bottom">
+              {browserSupportsSpeechRecognition && (
+                <Button
+                  type="button"
+                  size="lg"
+                  onTouchStart={startListening}
+                  onMouseDown={startListening}
+                  onTouchEnd={stopListening}
+                  onMouseUp={stopListening}
+                  disabled={AItyping}
+                  variant="dark"
+                >
+                  {listening ? <MicFill /> : <Mic />}
+                </Button>
+              )}
               <FormControl
                 minLength={4}
                 type="text"
                 name="prompt"
+                size="lg"
                 value={promptInput}
                 autoComplete="off"
                 disabled={AItyping}
-                onChange={(e) => setPromptInput(e.target.value)}
+                onChange={(e) => {
+                  setPromptInput(e.target.value);
+                  resetTranscript();
+                }}
               />
-              <Button type="submit" disabled={AItyping}>
+              <Button size="lg" type="submit" disabled={AItyping}>
                 send
               </Button>
             </InputGroup>
