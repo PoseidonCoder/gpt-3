@@ -69,6 +69,20 @@ export default function Home() {
 
   return (
     <div>
+      <div
+        style={{
+          position: "absolute",
+          left: "25%",
+          top: "25%",
+          backgroundColor: "tomato",
+          color: "white",
+          padding: "2rem",
+          boxSizing: "border-box",
+        }}
+      >
+        This website is temporarily shut down due to the unexpected high volume
+        of usage. Sorry ):
+      </div>
       <Head>
         <title>GPT-3-CHAT</title>
       </Head>
