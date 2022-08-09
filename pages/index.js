@@ -78,7 +78,9 @@ export default function Home() {
           color: "white",
           padding: "2rem",
           boxSizing: "border-box",
+          boxShadow: "10px 10px 10px lightgray",
         }}
+        className="rounded"
       >
         This website is temporarily shut down due to the unexpected high volume
         of usage. Sorry ):
